@@ -49,7 +49,7 @@ class PivotalTracker {
 			$function = $function.'/'.$story_id;
 		
 		$arr = $this->_execute($function);
-		$stories = $arr['stories']['story'];
+		$stories = $arr['story'];
 		return $stories;
 	}
 	
