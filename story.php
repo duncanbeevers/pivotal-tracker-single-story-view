@@ -1,34 +1,35 @@
 <?php
-
-// Helper functions
-function d($ds) {
-  return htmlspecialchars(strftime("%l:%M %P %a %b %e %Y", strtotime($ds)), ENT_COMPAT);
-}
-function q($s) {
-  return htmlspecialchars($s, ENT_QUOTES);
-}
-function h($s) {
-  return htmlspecialchars($s, ENT_COMPAT);
-}
-
 require("pivotaltracker_rest.php");
-$tracker = new PivotalTracker($_GET['token']);
+$tracker = new PivotalTracker();
 
-$story = $tracker->stories_get($_GET['project_id'], $_GET['story_id']);
-$description = $story['description'];
-$notes = $story['notes'];
-if ($notes['note'][0]) { $notes = $notes['note']; }
-$attachments = $story['attachments'];
-if ($attachments['attachment'][0]) { $attachments = $attachments['attachment']; }
-$estimate = $story['estimate'];
-if ($story['story_type']) {
-  $icon_path = 'icons/'.$story['story_type'].'.png';
+$token = $_GET['token'];
+if (!$token) {
+  $token = $_COOKIE['token'];
+}
+if (!$token) {
+  if ($_GET['username'] && $_GET['password']) {
+    $token = $tracker->authenticate($_GET['username'], $_GET['password']);
+    if ($token) {
+      $json = array( 'success' => true, 'token' => $token );
+    } else {
+      $json = array( 'success' => false );
+    }
+  }
+}
+
+if ($token) {
+  $tracker->token = $token;
+  $story = $tracker->stories_get($_GET['project_id'], $_GET['story_id']);
 }
 ?>
+
+<?php if ($json) { ?>
+<?= json_encode($json) ?>
+<?php } else { ?>
 <!doctype html>
 <html>
   <head>
-    <title>[<?= h($story['id']) ?>] <?= h($story['name']) ?></title>
+    <title></title>
     <style type="text/css">
 body, pre { font-family: Arial, Verdana, sans-serif; }
 pre {
@@ -55,11 +56,12 @@ img {
   vertical-align: baseline;
 }
 img.story_type {
-  margin-right: 0.5em;
+  margin-right: 0.25em;
 }
 img.autolinked {
+  margin-left: 0.5em;
   margin-right: 0.5em;
-  max-height: 75px;
+  max-height: 50px;
 }
 h1 {
   margin: 0 0 0.5em 0;
@@ -75,11 +77,14 @@ time {
   font-style: italic;
   font-size: 10px;
 }
-.description {
+.description pre {
   margin: 1em;
 }
 section {
   margin-bottom: 1.5em;
+}
+section.details {
+  margin-bottom: 0;
 }
 .itemized>div {
   padding: 0.5em;
@@ -93,7 +98,7 @@ section {
 .itemized img {
   max-height: 100px;
 }
-.itemized img.autolinked {
+.comments img {
   max-height: 50px;
 }
 .sig {
@@ -111,101 +116,190 @@ section {
   </head>
   <body>
 
-    <div class="story <?= q($story['current_state']) ?>">
-      <header>
-      <?php if ($icon_path) { ?>
-      <img class="story_type" src="<?= q($icon_path) ?>" alt="<?= q($story['story_type']) ?>" />
-      <?php } ?>
-        <h1 class="estimate_<?= q($estimate) ?>">[<a href="<?= q($story['url']) ?>"><?= h($story['id']) ?></a>] <?= h($story['name']) ?></h1>
-      </header>
+<!-- templates -->
+<script type="text/x-jquery-tmpl" id="tmpl-title">[${id}] ${name}</script>
+<script type="text/x-jquery-tmpl" id="tmpl-time"><time datetime="${$data}">${$data}</time></script>
 
-      <article id="article">
-        <section>
-          <h2>Description</h2>
-          <pre class="description"><? if ($description) { ?><?= h($description) ?><?php } ?></pre>
-        </section>
+<script type="text/x-jquery-tmpl" id="tmpl-story">
+<div class="story ${current_state}">
 
-        <?php if ($notes) { ?>
-        <section class="itemized">
-	  <h2>Comments</h2>
-          <?php foreach ($notes as $_ => $note) { ?>
-          <div>
-            <div class="sig">
-              <span class="username"><?= h($note['author']) ?></span>
-              <time><?= d($note['noted_at']) ?></time>
-            </div>
-            <pre><?= h($note['text']) ?></pre>
-          </div>
-          <?php } ?>
-        </section>
-        <?php } ?>
+  <header>
+    <img class="story_type" src="${icon_src}" alt="${story_type}" />
+    <h1 class="${estimate_class}">[<a href="${url}">${id}</a>] ${name}</h1>
+  </header>
 
-        <?php if ($attachments) { ?>
-        <section class="itemized">
-          <h2>Attachments</h2>
-          <?php foreach ($attachments as $_ => $attachment) { ?>
-          <div>
-            <div class="sig">
-              <span class="username"><?= h($attachment['uploaded_by']) ?></span>
-              <time><?= d($attachment['uploaded_at']) ?></time>
-            </div>
-            <?php
-            if (preg_match("/(?:\.png)|(?:\.gif)|(?:\.jpg)|(?:\jpeg)/i", $attachment['filename'])) {
-              $attachment_link_content = "<img src=\"".q($attachment['url'])."\" alt=\"".q($attachment['filename'])."\" />";
-            } else {
-              $attachment_link_content = h($attachment['filename']);
-            } ?>
-            <a href="<?= q($attachment['url']); ?>"><?= $attachment_link_content ?></a>
-          </div>
-          <? } ?>
-        </section>
-        <?php } ?>
+  <article class="article">
 
-        <div class="details">
-          <div class="requested_by">Requested by: <?= h($story['requested_by']) ?></div>
-          <div class="created_at">Created at: <time><?= d($story['created_at']) ?></time></div>
-          <div class="updated_at">Updated at: <time><?= d($story['updated_at']) ?></time></div>
+    <section class="description">
+      <h2>Description</h2>
+      <pre class="description">${description}</pre>
+    </section>
+
+    <section class="comments itemized">
+      <h2>Comments</h2>
+      {{each(i, comment) notes}}
+      <div>
+        <div class="sig">
+          <span class="username">${author}</span>
+          {{time noted_at}}
         </div>
-      </article>
+        <pre>${text}</pre>
+      </div>
+      {{/each}}
+    </section>
 
-    </div>
+    <section class="attachments itemized">
+      <h2>Attachments</h2>
+      {{each(i, attachment) attachments}}
+      <div>
+        <div class="sig">
+          <span class="username">${uploaded_by}</span>
+          {{time uploaded_at}}
+        </div>
+        {{embed_attachment attachment}}
+      </div>
+      {{/each}}
+    </section>
 
-    <a href="#" class="toggle_raw">raw</a>
+    <section class="details">
+      <div class="requested_by">Requested by: ${requested_by}</div>
+      <div class="created_at">Created at: {{time created_at}}</div> 
+      <div class="updated_at">Updated at: {{time updated_at}}</div>
+    </section>
 
-    <div class="raw">
-      <pre><?php print_r($story) ?></pre>
-    </div>
+  </article>
+</div>
+</script>
 
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js" type="text/javascript"></script>
-    <script type="text/javascript">
+<script type="text/x-jquery-tmpl" id="tmpl-image-attachment">
+<a href="${url}"><img src="${url}" alt="${filename}" />${filename}</a>
+</script>
 
+<script type="text/x-jquery-tmpl" id="tmpl-other-attachment">
+<a href="${url}">${filename}</a>
+</script>
+
+<!-- behavior -->
+<script src="//ajax.microsoft.com/ajax/jQuery/jquery-1.5.2.min.js" >type="text/javascript"></script>
+<script src="//ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+// Auto-link urls
+// Auto-embed image links
 (function($) {
+  var img = /(?:\.png)|(?:\.jpg)|(?:\.jpeg)|(?:\.gif)/i;
   $.fn.extend({
     linkURLs: function(options){
-      var url_matcher = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig,
-          img = /(?:\.png)|(?:\.jpg)|(?:\.jpeg)|(?:\.gif)/i;
-      this.each( function(){
-var t = $(this);
-        t.html( t.html().replace(url_matcher, function(url) {
+      var matchUrl = /([^"]\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+
+      function replaceUrl(url) {
         if (url.match(img)) {
           return "<a href=\"" + url + "\"><img class=\"autolinked\" src=\"" + url + "\" alt=\"" + url + "\"/>" + url + "</a>";
         } else {
           return "<a href=\"" + url + "\">" + url + "</a>";
         }
-}) );
+      }
+
+      this.each(function(){
+        $(this).html($(this).html().replace(matchUrl, replaceUrl));
       });
+
       return this;
     }
   });
+
+  $.tmpl.tag.embed_attachment = {
+    open: "if($notnull_1){_=_.concat($item.nest((attachment.filename.match(" +
+      img +
+      ") ? \"#tmpl-image-attachment\" : \"#tmpl-other-attachment\"),$1));}"
+  };
+  $.tmpl.tag.time = {
+    open: "if($notnull_1){_=_.concat($item.nest(\"#tmpl-time\",$1));}"
+  }
+
+  jQuery.cookie = function (key, value, options) {
+    
+    // key and at least value given, set cookie...
+    if (arguments.length > 1 && String(value) !== "[object Object]") {
+        options = jQuery.extend({}, options);
+
+        if (value === null || value === undefined) {
+            options.expires = -1;
+        }
+
+        if (typeof options.expires === 'number') {
+            var days = options.expires, t = options.expires = new Date();
+            t.setDate(t.getDate() + days);
+        }
+        
+        value = String(value);
+        
+        return (document.cookie = [
+            encodeURIComponent(key), '=',
+            options.raw ? value : encodeURIComponent(value),
+            options.expires ? '; expires=' + options.expires.toUTCString() : '', // use expires attribute, max-age is not supported by IE
+            options.path ? '; path=' + options.path : '',
+            options.domain ? '; domain=' + options.domain : '',
+            options.secure ? '; secure' : ''
+        ].join(''));
+    }
+
+    // key and possibly options given, get cookie...
+    options = value || {};
+    var result, decode = options.raw ? function (s) { return s; } : decodeURIComponent;
+    return (result = new RegExp('(?:^|; )' + encodeURIComponent(key) + '=([^;]*)').exec(document.cookie)) ? decode(result[1]) : null;
+  };
+
 })(jQuery);
 
-$('#article pre').linkURLs();
-$('.toggle_raw').click(function(e) {
-  $('#article,.raw').toggle();
-  return false;
-});
+<?php if ($story) { ?>
+
+  (function(data) {
+    // Massage data for templates
+    data.icon_src = "icons/" + data.story_type + ".png";
+    data.estimate_class = "estimate_" + data.estimate;
+    
+    // Set the title
+    $('title').html($('#tmpl-title').tmpl(data));
+    
+    // Build the story
+    var storyMarkup = $('#tmpl-story').tmpl(data);
+    if (!data.notes) { storyMarkup.find('.comments').hide(); }
+    if (!data.attachments) { storyMarkup.find('.attachments').hide(); }
+    $('body').append(storyMarkup);
+  
+    // Make links of the urls
+    $('.article pre').linkURLs();
+  
+  })(<?= json_encode($story) ?>);
+
+<?php } else { ?>
+
+  (function() {
+    var username, password;
+    username = prompt("One-time setup\nPlease enter your Pivotal Tracker username");
+    if (username) {
+      password = prompt("One-time setup\nPlease enter your Pivotal Tracker password");
+    }
+
+    if (username && password) {
+      $.ajax('', { data: { username: username, password: password }, dataType: 'json' }).success(function(data) {
+        if (data.success) {
+          $.cookie('token', data.token, { expires: 365 * 20 } );
+          document.location.reload();
+        } else {
+          alert('Set-up Failed');
+        }
+      });
+    }
+  })();
+
+<?php } ?>
+
 
     </script>
   </body>
 </html>
+
+<?php } ?>
 
