@@ -198,7 +198,7 @@ section.details {
   var img = /(?:\.png)|(?:\.jpg)|(?:\.jpeg)|(?:\.gif)/i;
   $.fn.extend({
     linkURLs: function(options){
-      var matchUrl = /([^"]\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+      var matchUrl = /[^"]\b((https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
 
       function replaceUrl(url) {
         if (url.match(img)) {
