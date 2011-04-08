@@ -42,6 +42,7 @@ body {
 .story {
   padding: 1em;
   background-color: #F0ECCA;
+  border-radius: 6px;
 }
 .story.accepted {
   background-color: #CFE4C7;
@@ -55,22 +56,27 @@ body {
 img {
   vertical-align: baseline;
 }
-img.story_type {
-  margin-right: 0.25em;
-}
 img.autolinked {
   margin-left: 0.5em;
   margin-right: 0.5em;
   max-height: 50px;
 }
+header {
+  padding-bottom: 0.5em;
+  margin-bottom: 1em;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.5);
+  text-shadow: rgba(256, 256, 256, 0.2) 0px 1px 0px;
+}
 h1 {
-  margin: 0 0 0.5em 0;
-  font-size: 24px;
-  display: inline-block;
+  margin: 0;
+  font-size: 20px;
 }
 h2 {
   margin: 0;
-  font-size: 18px;
+  font-size: 16px;
+}
+header h1 {
+  display: inline-block;
 }
 time {
   color: #7C7B76;
@@ -85,7 +91,8 @@ section.details {
 }
 .itemized>div {
   padding: 0.5em;
-  border-top: 1px solid #C0CFEB;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(192, 192, 192, 0.5);
   font-size: 14px;
   line-height: 15px;
 }
@@ -104,6 +111,11 @@ section.details {
 .sig {
   padding-bottom: 1em;
 }
+.story_type { padding-left: 32px; background-repeat: no-repeat; background-position: 8px 4px; }
+.story_type_bug { background-image: url(icons/bug.png); }
+.story_type_release { background-image: url(icons/release.png); }
+.story_type_chore { background-image: url(icons/chore.png); }
+.story_type_feature { background-image: url(icons/feature.png); }
 .estimate_-1:after { content: " \2022  unestimated"; }
 .estimate_0:after { content: " \2022  0 points"; }
 .estimate_1:after { content: " \2022  1 point"; }
@@ -121,8 +133,7 @@ section.details {
 <div class="story ${current_state}">
 
   <header>
-    <img class="story_type" src="${icon_src}" alt="${story_type}" />
-    <h1 class="${estimate_class}">[<a href="${url}">${id}</a>] ${name}</h1>
+    <h1 class="story_type ${story_type_class} ${estimate_class}">[<a href="${url}">${id}</a>] ${name}</h1>
   </header>
 
   <article class="article">
@@ -253,7 +264,7 @@ section.details {
 
   (function(data) {
     // Massage data for templates
-    data.icon_src = "icons/" + data.story_type + ".png";
+    data.story_type_class = "story_type_" + data.story_type;
     data.estimate_class = "estimate_" + data.estimate;
     
     // Set the title
@@ -300,4 +311,5 @@ section.details {
 </html>
 
 <?php } ?>
+
 
