@@ -1,25 +1,30 @@
-Author: Jeremy Blanchard
+Pivotal Tracker Single Story View
+=
 
-Email: auzigog@gmail.com
+Installation
+-
+Obtain a shell on your PHP host to install
 
-License: Use it. :)
+    git clone git@github.com:duncanbeevers/pivotal-tracker-single-story-view.git
+    chmod u+x story.php
 
-### Introduction
-php_pivotal_tracker is currently a bare-bones implementation of the Pivotal Tracker API in PHP.
-
-It has the core features to do function calls using CURL for requests.
-
-Please send pull requests if you make any additions for projects you have.
-
-The code has not been extensively tested. Use at your own risk.
-
-### TODO
-*   Error handling (internally and over REST)
-*   Finish implementing all API functions
-*   Encoding checks
+[Obtain your Pivotal Tracker token](https://www.pivotaltracker.com/help/api?version=v3#retrieve_token)
 
 
-### Further Reading
-[Pivotal Tracker API](http://www.pivotaltracker.com/help/api?version=v3)
+Browse
 
-[Other language wrappers](http://www.pivotaltracker.com/help/thirdpartytools)
+    http://www.example.com/story.php?token=TOKEN&project_id=PROJECT_ID&story_id=STORY_ID
+
+Screenshot
+-
+
+![Screenshot](http://dweebd.com/data/PivotalTrackerSingleStoryView.png)
+
+
+License
+-
+[WTFPL](http://sam.zoy.org/wtfpl/)
+
+Thanks to Jeremy Blanchard for the simple PHP interface to Pivotal Tracker
+
+
