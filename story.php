@@ -77,9 +77,6 @@ time {
   font-style: italic;
   font-size: 10px;
 }
-.description pre {
-  margin: 1em;
-}
 section {
   margin-bottom: 1.5em;
 }
@@ -92,6 +89,9 @@ section.details {
   font-size: 14px;
   line-height: 15px;
 }
+.description pre {
+  margin: 1em;
+}
 .itemized pre {
   padding-left: 1em;
 }
@@ -103,9 +103,6 @@ section.details {
 }
 .sig {
   padding-bottom: 1em;
-}
-.raw {
-  display: none;
 }
 .estimate_-1:after { content: " \2022  unestimated"; }
 .estimate_0:after { content: " \2022  0 points"; }
