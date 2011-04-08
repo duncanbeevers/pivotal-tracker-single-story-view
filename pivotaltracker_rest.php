@@ -18,7 +18,10 @@ class PivotalTracker {
 	}
 	
 	// Helper function for quick authentication
-	function authenticate() {
+	function authenticate($username = NULL, $password = NULL) {
+                if ($username) { $this->username = $username; }
+                if ($password) { $this->password = $password; }
+
 		$this->rest->username = $this->username;
 		$this->rest->password = $this->password;
 		$token = $this->rest->authenticate();
@@ -135,7 +138,6 @@ class PivotalTrackerREST {
 		
 		$function = 'tokens/active';
 		$token_arr = $this->_execute($function, null, 'GET', $auth);
-		
 		return $token_arr;
 	}
 	
