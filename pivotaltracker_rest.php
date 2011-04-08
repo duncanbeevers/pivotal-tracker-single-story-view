@@ -52,8 +52,16 @@ class PivotalTracker {
 			$function = $function.'/'.$story_id;
 		
 		$arr = $this->_execute($function);
-		$stories = $arr['story'];
-		return $stories;
+		$story = $arr['story'];
+
+  if ($story['attachments']['attachment'][0]) {
+    $story['attachments'] = $story['attachments']['attachment'];
+  }
+  if ($story['notes']['note'][0]) {
+    $story['notes'] = $story['notes']['note'];
+  }
+
+		return $story;
 	}
 	
 	function stories_get_by_filter($project_id, $filter) {
