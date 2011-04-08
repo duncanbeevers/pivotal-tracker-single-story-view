@@ -97,8 +97,8 @@ if ($token) {
 </script>
 
 <!-- behavior -->
-<script src="//ajax.microsoft.com/ajax/jQuery/jquery-1.5.2.min.js" >type="text/javascript"></script>
-<script src="//ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js" type="text/javascript"></script>
+<script type="text/javascript" src="//ajax.microsoft.com/ajax/jQuery/jquery-1.5.2.min.js"></script>
+<script type="text/javascript" src="//ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js"></script>
 <script type="text/javascript" src="jquery.cookie.js"></script>
 
 <script type="text/javascript">
