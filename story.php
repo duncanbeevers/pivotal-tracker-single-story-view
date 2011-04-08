@@ -7,7 +7,7 @@ if (!$token) {
   $token = $_COOKIE['token'];
 }
 if (!$token) {
-  if ($_GET['username'] && $_GET['password']) {
+  if (array_key_exists('username', $_GET) && array_key_exists('password', $_GET)) {
     $token = $tracker->authenticate($_GET['username'], $_GET['password']);
     if ($token) {
       $json = array( 'success' => true, 'token' => $token );
@@ -38,6 +38,47 @@ pre {
 }
 body {
   background-color: #9DA7AA;
+}
+.login {
+  background-color: white;
+  border-radius: 6px;
+  margin: 0 auto;
+  max-width: 600px;
+  padding: 1em;
+}
+.login label {
+  text-align: left;
+  font-weight: bold;
+}
+.login input {
+  font-size: 1.5em;
+}
+.login button {
+  padding: 1em;
+  border: none;
+  border-radius: 6px;
+  background-color: #0F5271;
+  color: white;
+  font-size: 18px;
+  box-shadow: 0 1px 2px #808080;
+  text-shadow: 0 1px 1px #303030;
+  margin: 0;
+}
+.login button:active {
+  margin-top: 1px;
+  margin-bottom: -1px;
+}
+.login button:disabled {
+  background-color: #606060;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.errors {
+  background: transparent url(icons/error.png) no-repeat;
+  background-position: 1em 1em;
+  text-indent: 24px;
+  padding: 1em;
+  border: 1px solid #ff0000;
 }
 .story {
   padding: 1em;
@@ -87,6 +128,9 @@ section {
   margin-bottom: 1.5em;
 }
 section.details {
+  margin-bottom: 0;
+}
+section:last-child {
   margin-bottom: 0;
 }
 .itemized>div {
@@ -259,9 +303,10 @@ section.details {
   };
 
 })(jQuery);
+</script>
 
-<?php if ($story) { ?>
-
+<?php if ($story && $token) { ?>
+<script type="text/javascript">
   (function(data) {
     // Massage data for templates
     data.story_type_class = "story_type_" + data.story_type;
@@ -281,32 +326,87 @@ section.details {
     $('.article pre').linkURLs();
   
   })(<?= json_encode($story) ?>);
+</script>
+
+<?php } elseif ($token) { ?>
+
 
 <?php } else { ?>
 
-  (function() {
-    var username, password;
-    username = prompt("One-time setup\nPlease enter your Pivotal Tracker username");
-    if (username) {
-      password = prompt("One-time setup\nPlease enter your Pivotal Tracker password");
-    }
+<script type="text/x-jquery-tmpl" id="tmpl-token-errors">
+<section class="errors">
+  There was an error retrieving your API token.
+</section>
+</script>
 
-    if (username && password) {
-      $.ajax('', { data: { username: username, password: password }, dataType: 'json' }).success(function(data) {
-        if (data.success) {
-          $.cookie('token', data.token, { expires: 365 * 20 } );
-          document.location.reload();
-        } else {
-          alert('Set-up Failed');
-        }
+<form id="retrieve_token">
+  <div class="login">
+    <header>
+      <h1>Pivotal Tracker Single Story View</h2>
+    </header>
+    <section>
+      We don't currently know your Pivotal Tracker API Token.<br />
+      Use this form to retrieve and store your token.
+    </section>
+    <section>
+      <label for="username">Username</label><br />
+      <input type="text" id="username" name="username" />
+    </section>
+    <section>
+      <label for="password">Password</label><br />
+      <input type="password" id="password" name="password" />
+    </section>
+    <section>
+      <button type="submit">Retrieve Token</button>
+    </section>
+  </div>
+</form>
+
+<script type="text/javascript">
+  (function() {
+    $.ajaxPrefilter(function(options, localOptions, jqXHR) {
+      var deferred = $.Deferred();
+
+      jqXHR.done(function(json) {
+        deferred[json.success ? 'resolve' : 'reject'](json);
       });
-    }
+
+      jqXHR = deferred.promise(jqXHR);
+      jqXHR.success = jqXHR.done;
+      jqXHR.error = jqXHR.fail;
+    });
+
+    $('#retrieve_token').submit(function() {
+      $('.login button').attr('disabled', true);
+      $('.login .errors').remove();
+
+      var req = $.ajax('', {
+        data: {
+          username: $('#username').val(),
+          password: $('#password').val()
+        },
+        dataType: 'json',
+        beforeSend: function() { $('.login button').attr('disabled', true); }
+      });
+
+      req.success(function(json) {
+        $.cookie('token', json.token, { expires: 365 * 20, path: '/' });
+        document.location.reload();
+      });
+
+      req.fail(function() {
+        $('.login button').attr('disabled', false);
+        $('.login').append($('#tmpl-token-errors').tmpl());
+      });
+
+      return false;
+    });
+
   })();
+</script>
 
 <?php } ?>
 
-
-    </script>
   </body>
 </html>
 
