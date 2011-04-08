@@ -261,6 +261,7 @@ section.details {
     
     // Build the story
     var storyMarkup = $('#tmpl-story').tmpl(data);
+    if (!data.description[0]) { storyMarkup.find('.description').hide(); }
     if (!data.notes) { storyMarkup.find('.comments').hide(); }
     if (!data.attachments) { storyMarkup.find('.attachments').hide(); }
     $('body').append(storyMarkup);
