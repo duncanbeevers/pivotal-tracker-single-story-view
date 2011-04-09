@@ -36,7 +36,7 @@ if ($token) {
 <?php if ($story) { ?>
 <!-- templates -->
 <script type="text/x-jquery-tmpl" id="tmpl-title">[${id}] ${name}</script>
-<script type="text/x-jquery-tmpl" id="tmpl-time"><time datetime="${$data}">${$data}</time></script>
+<script type="text/x-jquery-tmpl" id="tmpl-time"><time class="timeago" datetime="${$data}">${$data}</time></script>
 
 <script type="text/x-jquery-tmpl" id="tmpl-story">
 <div class="story ${current_state}">
@@ -80,8 +80,8 @@ if ($token) {
 
     <section class="details">
       <div class="requested_by">Requested by: ${requested_by}</div>
-      <div class="created_at">Created at: {{time created_at}}</div> 
-      <div class="updated_at">Updated at: {{time updated_at}}</div>
+      <div class="created_at">Created: {{time created_at}}</div> 
+      <div class="updated_at">Updated: {{time updated_at}}</div>
     </section>
 
   </article>
@@ -101,9 +101,11 @@ if ($token) {
 <script type="text/javascript" src="//ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js"></script>
 <script type="text/javascript" src="jquery.cookie.js"></script>
 <script type="text/javascript" src="pivotalTrackerSingleStoryView.js"></script>
+<script type="text/javascript" src="jquery.timeago.js"></script>
 
 <script type="text/javascript">
 $.pivotalTrackerSingleStoryView(<?= json_encode($story) ?>);
+$('time').timeago();
 </script>
 
 <?php } elseif (!array_key_exists('project_id', $_GET) || !array_key_exists('story_id', $_GET)) { ?>

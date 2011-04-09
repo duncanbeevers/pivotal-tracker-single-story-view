@@ -22,13 +22,25 @@
     }
   });
 
+  $.ISODateString = function(d) {
+    function pad(n){
+      return n<10 ? '0'+n : n;
+    }
+    return d.getUTCFullYear()+'-'+
+      pad(d.getUTCMonth()+1)+'-'+
+      pad(d.getUTCDate())+'T'+
+      pad(d.getUTCHours())+':'+
+      pad(d.getUTCMinutes())+':'+
+      pad(d.getUTCSeconds())+'Z';
+  };
+
   $.tmpl.tag.embed_attachment = {
     open: "if($notnull_1){_=_.concat($item.nest((attachment.filename.match(" +
       img +
       ") ? \"#tmpl-image-attachment\" : \"#tmpl-other-attachment\"),$1));}"
   };
   $.tmpl.tag.time = {
-    open: "if($notnull_1){_=_.concat($item.nest(\"#tmpl-time\",$1));}"
+    open: "if($notnull_1){_=_.concat($item.nest(\"#tmpl-time\",$.ISODateString(new Date($1))));}"
   };
 
   $.pivotalTrackerSingleStoryView = (function(data) {
@@ -51,5 +63,6 @@
 
     return this;
   });
+
 })(jQuery);
 
