@@ -22,7 +22,6 @@ if ($token) {
   $story = $tracker->stories_get($_GET['project_id'], $_GET['story_id']);
 }
 ?>
-
 <?php if ($json) { ?>
 <?= json_encode($json) ?>
 <?php } else { ?>
@@ -96,7 +95,7 @@ if ($token) {
 <script type="text/x-jquery-tmpl" id="tmpl-other-attachment">
 <a href="${url}">${filename}</a>
 </script>
-
+ 
 <!-- behavior -->
 <script type="text/javascript" src="//ajax.microsoft.com/ajax/jQuery/jquery-1.5.2.min.js"></script>
 <script type="text/javascript" src="//ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js"></script>
@@ -106,6 +105,14 @@ if ($token) {
 <script type="text/javascript">
 $.pivotalTrackerSingleStoryView(<?= json_encode($story) ?>);
 </script>
+
+<?php } elseif (!array_key_exists('project_id', $_GET) || !array_key_exists('story_id', $_GET)) { ?>
+
+<div class="dialog">
+  <section class="errors">
+    Missing project_id or story_id parameters.
+  </section>
+</div>
 
 <?php } elseif ($token) { ?>
 
@@ -120,6 +127,7 @@ document.location.reload();
 
 <?php } else { ?>
 
+<!-- templates -->
 <script type="text/x-jquery-tmpl" id="tmpl-token-errors">
 <section class="errors">
   There was an error retrieving your API token.
@@ -127,7 +135,7 @@ document.location.reload();
 </script>
 
 <form id="retrieve_token">
-  <div class="login">
+  <div class="login dialog">
     <header>
       <h1>Pivotal Tracker Single Story View</h2>
     </header>
@@ -149,14 +157,13 @@ document.location.reload();
   </div>
 </form>
 
+<!-- behavior -->
+<script type="text/javascript" src="//ajax.microsoft.com/ajax/jQuery/jquery-1.5.2.min.js"></script>
+<script type="text/javascript" src="//ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js"></script>
+<script type="text/javascript" src="jquery.cookie.js"></script>
 <script type="text/javascript" src="pivotalTrackerRetrieveToken.js"></script>
 
-
 <?php } ?>
-
   </body>
 </html>
-
 <?php } ?>
-
-
