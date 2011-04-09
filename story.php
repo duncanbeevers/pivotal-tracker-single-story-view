@@ -34,6 +34,7 @@ if ($token) {
   </head>
   <body>
 
+<?php if ($story) { ?>
 <!-- templates -->
 <script type="text/x-jquery-tmpl" id="tmpl-title">[${id}] ${name}</script>
 <script type="text/x-jquery-tmpl" id="tmpl-time"><time datetime="${$data}">${$data}</time></script>
@@ -100,16 +101,22 @@ if ($token) {
 <script type="text/javascript" src="//ajax.microsoft.com/ajax/jQuery/jquery-1.5.2.min.js"></script>
 <script type="text/javascript" src="//ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js"></script>
 <script type="text/javascript" src="jquery.cookie.js"></script>
-
-<?php if ($story && $token) { ?>
-
 <script type="text/javascript" src="pivotalTrackerSingleStoryView.js"></script>
+
 <script type="text/javascript">
 $.pivotalTrackerSingleStoryView(<?= json_encode($story) ?>);
 </script>
 
 <?php } elseif ($token) { ?>
 
+<!-- behavior -->
+<script type="text/javascript" src="//ajax.microsoft.com/ajax/jQuery/jquery-1.5.2.min.js"></script>
+<script type="text/javascript" src="jquery.cookie.js"></script>
+
+<script type="text/javascript">
+$.cookie('token', null, { path: '/' });
+document.location.reload();
+</script>
 
 <?php } else { ?>
 
