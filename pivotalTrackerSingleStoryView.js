@@ -67,6 +67,7 @@
     // Massage data for templates
     data.story_type_class = "story_type_" + data.story_type;
     data.estimate_class = "estimate_" + data.estimate;
+    data.url = data.url + '#from-single-story-view';
     
     // Set the title
     $('title').html($('#tmpl-title').tmpl(data));
