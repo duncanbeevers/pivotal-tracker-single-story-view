@@ -35,14 +35,33 @@
       pad(d.getUTCSeconds())+'Z';
   };
 
-  $.tmpl.tag.embed_attachment = {
-    open: "if($notnull_1){_=_.concat($item.nest((attachment.filename.match(" +
-      img +
-      ") ? \"#tmpl-image-attachment\" : \"#tmpl-other-attachment\"),$1));}"
-  };
-  $.tmpl.tag.time = {
-    open: "if($notnull_1){_=_.concat($item.nest(\"#tmpl-time\",$.ISODateString(new Date($1))));}"
-  };
+  $.fn.extend({
+    tmplWithCustomTags: function(data, helperTemplates) {
+      var original_tags = {},
+          tag = $.tmpl.tag,
+          helpers = {},
+          result;
+
+      $.each(helperTemplates, function(helper_name, fn) {
+        var json_helper_name = JSON.stringify(helper_name);
+
+        original_tags[helper_name] = tag[helper_name];
+        tag[helper_name] = {
+          open: 'if($notnull_1){_.push($("<div>").append($item[' +
+            JSON.stringify(helper_name) +
+            ']($1).html()));}'
+        };
+        helpers[helper_name] = fn;
+      });
+
+      result = this.tmpl(data, helpers);
+
+      $.each(helperTemplates, function(helper_name, _) {
+        tag[helper_name] = original_tags[helper_name];
+      });
+      return result;
+    }
+  });
 
   $.pivotalTrackerSingleStoryView = (function(data) {
     // Massage data for templates
@@ -53,7 +72,13 @@
     $('title').html($('#tmpl-title').tmpl(data));
     
     // Build the story
-    var storyMarkup = $('#tmpl-story').tmpl(data);
+    var storyMarkup = $('#tmpl-story').tmplWithCustomTags(data, {
+      time: function(time) { return $('#tmpl-time').tmpl($.ISODateString(time)); },
+      embed_attachment: function(attachment) {
+        var template = attachment.filename.match(img) ? '#tmpl-image-attachment' : '#tmpl-other-attachment';
+        return $(template).tmpl(attachment);
+      }
+    });
     if (!data.description[0]) { storyMarkup.find('.description').hide(); }
     if (!data.notes) { storyMarkup.find('.comments').hide(); }
     if (!data.attachments) { storyMarkup.find('.attachments').hide(); }
