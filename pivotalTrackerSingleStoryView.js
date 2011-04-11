@@ -22,7 +22,8 @@
     }
   });
 
-  $.ISODateString = function(d) {
+  $.ISODateString = function(s) {
+    d = new Date(s);
     function pad(n){
       return n<10 ? '0'+n : n;
     }
