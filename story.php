@@ -119,7 +119,7 @@ $('time').timeago();
 <?php } elseif ($token) { ?>
 
 <!-- behavior -->
-<script type="text/javascript" src="//ajax.microsoft.com/ajax/jQuery/jquery-1.5.2.min.js"></script>
+<script type="text/javascript" src="jquery-1.5.2.min.js"></script>
 <script type="text/javascript" src="jquery.cookie.js"></script>
 
 <script type="text/javascript">
@@ -160,8 +160,8 @@ document.location.reload();
 </form>
 
 <!-- behavior -->
-<script type="text/javascript" src="//ajax.microsoft.com/ajax/jQuery/jquery-1.5.2.min.js"></script>
-<script type="text/javascript" src="//ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js"></script>
+<script type="text/javascript" src="jquery-1.5.2.min.js"></script>
+<script type="text/javascript" src="jquery.tmpl.min.js"></script>
 <script type="text/javascript" src="jquery.cookie.js"></script>
 <script type="text/javascript" src="pivotalTrackerRetrieveToken.js"></script>
 
