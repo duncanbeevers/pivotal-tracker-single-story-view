@@ -49,7 +49,7 @@
         tag[helper_name] = {
           open: 'if($notnull_1){_.push($("<div>").append($item[' +
             JSON.stringify(helper_name) +
-            ']($1).html()));}'
+            ']($1)).html());}'
         };
         helpers[helper_name] = fn;
       });
